@@ -16,8 +16,9 @@ public class PlayerController : MonoBehaviour {
     [SerializeField]
     private bool isFacingRight = true;
 
+    //Jumping Variables
     [SerializeField]
-    private Transform m_GroundPointTrans;
+    private Transform m_GroundPoint;
     
     private bool isGrounded = false;
     
@@ -29,6 +30,15 @@ public class PlayerController : MonoBehaviour {
     [SerializeField]
     private float m_JumpHeight;
     
+
+    //Shooting Variables
+    [SerializeField]
+    private Transform m_ShootPoint;
+
+    private float m_ShootRate = 0.5f;
+
+    private float m_NextShootTime = 0f;
+
     private void Start( ) {
 
         if( m_MaxSpeed <= 0 ) {
@@ -41,16 +51,37 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Update( ) {
-        if( Input.GetAxis( "Jump" ) > 0 && isGrounded ) {
+
+        if( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
             isGrounded = false;
             m_Anim.SetBool( "IsGrounded", isGrounded );
             m_Rb.AddForce( new Vector2( 0, m_JumpHeight ) );
+        }
+
+        if( Input.GetKeyDown( KeyCode.Z ) ) {
+
+            if( Time.time > m_NextShootTime ) {
+
+                m_NextShootTime = Time.time + m_ShootRate;
+                
+                if( isFacingRight ) {
+
+                    ObjectManager.Instance.CreateObj( ENUM_Weapon.Rocket, m_ShootPoint.position, Quaternion.Euler( new Vector3( 0, 0, 0 ) ) );
+
+                } else if( !isFacingRight ) {
+
+                    ObjectManager.Instance.CreateObj( ENUM_Weapon.Rocket, m_ShootPoint.position, Quaternion.Euler( new Vector3( 0, 0, 180 ) ) );
+                 
+                }
+
+            }
+
         }
     }
 
     private void FixedUpdate( ) {
 
-        isGrounded = Physics2D.OverlapCircle( m_GroundPointTrans.position, POINT_RADIUS, groundLayer );
+        isGrounded = Physics2D.OverlapCircle( m_GroundPoint.position, POINT_RADIUS, groundLayer );
         m_Anim.SetBool( "IsGrounded", isGrounded );
         m_Anim.SetFloat( "JumpVelocity", m_Rb.velocity.y );
 
