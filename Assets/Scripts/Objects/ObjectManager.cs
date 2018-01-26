@@ -51,6 +51,5 @@ public class ObjectManager : IObject {
         Instantiate( theObj, _SpawnPosition, _SpawnRotation );
         
         return theObj;
-        
     }
 }

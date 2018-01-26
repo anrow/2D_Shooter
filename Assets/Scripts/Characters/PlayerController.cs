@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour {
 
     private Animator m_Anim;
 
+	private HealthController m_Health;
+
     // Movement Variables
     [SerializeField]
     private float m_MaxSpeed = 0;
@@ -48,6 +50,8 @@ public class PlayerController : MonoBehaviour {
         m_Rb = this.gameObject.GetComponent<Rigidbody2D>( );
 
         m_Anim = this.gameObject.GetComponentInChildren<Animator>( );
+
+		m_Health = this.gameObject.GetComponent<HealthController>( );
     }
 
     private void Update( ) {
@@ -73,10 +77,14 @@ public class PlayerController : MonoBehaviour {
                     ObjectManager.Instance.CreateObj( ENUM_Weapon.Rocket, m_ShootPoint.position, Quaternion.Euler( new Vector3( 0, 0, 180 ) ) );
                  
                 }
-
             }
-
         }
+
+		if( m_Health.IsDead( ) ) {
+			ObjectManager.Instance.CreateObj (ENUM_Fx.DeathFx, transform.position);
+			Destroy (this.gameObject);
+		}
+			
     }
 
     private void FixedUpdate( ) {

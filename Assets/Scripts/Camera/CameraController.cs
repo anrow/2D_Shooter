@@ -16,7 +16,7 @@ public class CameraController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start( ) {
-
+		
 		m_Offset = transform.position - m_Target.position;
 
         m_LowY = transform.position.y;
@@ -24,7 +24,9 @@ public class CameraController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void FixedUpdate( ) {
-
+		if (m_Target == null) {
+			return;
+		}
 		Vector3 targetCamPos = m_Target.position + m_Offset;
 
         transform.position = Vector3.Lerp( transform.position, targetCamPos, m_LerpRate * Time.deltaTime );
