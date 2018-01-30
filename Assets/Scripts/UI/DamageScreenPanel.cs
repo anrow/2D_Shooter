@@ -36,7 +36,7 @@ public class DamageScreenPanel : MonoBehaviour {
 		} else if( m_Player.CurrentHealth <= 3 ) {
 			//m_DamageScreenImage.color = m_DangerColor;
 		}else {
-			m_DamageScreenImage.color = Color.Lerp (m_DamageScreenImage.color, Color.clear, m_SmoothColorRate * Time.deltaTime);
+			m_DamageScreenImage.color = Color.Lerp( m_DamageScreenImage.color, Color.clear, m_SmoothColorRate * Time.deltaTime );
 		}
 		m_Player.IsHurt = false;
 	}

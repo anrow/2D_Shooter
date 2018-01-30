@@ -26,7 +26,7 @@ public class DamageController : MonoBehaviour {
 	}
 
 	void OnTriggerStay2D( Collider2D _Other ) {
-		if (_Other.gameObject.tag == "Player" && m_NextDamageTime < Time.time) {
+		if( _Other.gameObject.tag == "Player" && m_NextDamageTime < Time.time ) {
 			HealthController thePlayerHealth = _Other.gameObject.GetComponent<HealthController>( );
 
 			thePlayerHealth.AddDamage( m_Damage );

@@ -43,7 +43,7 @@ public class HealthController : MonoBehaviour {
 		}
 	}
 
-    public void Start( ) {
+    private void Start( ) {
         m_CurrentHealth = m_MaxHealth;
     }
 
