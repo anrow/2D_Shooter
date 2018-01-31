@@ -8,7 +8,8 @@ public enum ENUM_Fx {
 }
 
 public enum ENUM_Weapon {
-    Rocket
+    Rocket,
+    Spore
 }
 
 public abstract class IObject : MonoBehaviour {

@@ -18,7 +18,7 @@ public class EnemyController : MonoBehaviour {
     [SerializeField]
     private float m_FlipTime;
 
-    private float m_NextFlipTime = 0f;
+    private float m_NextFlipTime;
 
     //Attacking
     [SerializeField]
@@ -59,11 +59,7 @@ public class EnemyController : MonoBehaviour {
         isFacingRight = !isFacingRight;
     }
 
-    private void OnTriggerEnter2D( Collider2D _Other ){
- 
-        if(  _Other.tag == "Wall" ) {
-            Debug.Log( "!!" );
-        }
+    private void OnTriggerEnter2D( Collider2D _Other ) {
         
         if( _Other.tag == "Player" ) {
             if( isFacingRight && _Other.transform.position.x < transform.position.x ) {

@@ -46,6 +46,9 @@ public class ObjectManager : IObject {
             case ENUM_Weapon.Rocket:
                 theObj = Resources.Load( "Weapons/Rocket" ) as GameObject;
                 break;
+            case ENUM_Weapon.Spore:
+                theObj = Resources.Load( "Weapons/Spore" ) as GameObject;
+                break;
         }
 
         Instantiate( theObj, _SpawnPosition, _SpawnRotation );

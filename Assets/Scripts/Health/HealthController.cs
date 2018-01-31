@@ -47,12 +47,23 @@ public class HealthController : MonoBehaviour {
         m_CurrentHealth = m_MaxHealth;
     }
 
-    public void AddDamage( float _Damage ) {
+    public void AddDamage( float _DamageVaule ) {
+
 		isHurt = true;
-        if( _Damage <= 0 ) {
+
+        if( _DamageVaule <= 0 ) {
             return;
         }
 
-        m_CurrentHealth -= _Damage;
+        m_CurrentHealth -= _DamageVaule;
+    }
+
+    public void AddHealth( float _HealthVaule ) {
+
+         m_CurrentHealth += _HealthVaule;
+
+        if( m_CurrentHealth >= m_MaxHealth ) {
+           m_CurrentHealth = m_MaxHealth;
+        }
     }
 }
