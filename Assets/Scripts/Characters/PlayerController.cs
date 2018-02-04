@@ -19,12 +19,18 @@ public class PlayerController : MonoBehaviour {
     [SerializeField]
     private bool isFacingRight;
 
+    private float m_Horizontal;
+
+    private bool isRun = false;
+
     //Jumping Variables
     [SerializeField]
     private Transform m_GroundPoint;
     
     private bool isGrounded = false;
     
+    private bool isJump = false;
+
     private const float POINT_RADIUS = 0.2f;
     
     [SerializeField]
@@ -33,7 +39,6 @@ public class PlayerController : MonoBehaviour {
     [SerializeField]
     private float m_JumpHeight;
     
-
     //Shooting Variables
     [SerializeField]
     private Transform m_ShootPoint;
@@ -42,11 +47,21 @@ public class PlayerController : MonoBehaviour {
 
     private float m_NextShootTime = 0f;
 
-    private void Start( ) {
+    private bool isShoot = false;
 
-        if( m_MaxSpeed <= 0 ) {
-            m_MaxSpeed = 5;
-        }
+    public enum ENUM_PlayerState {
+        Idle,
+        Move,
+        Jump,
+        Shoot,
+        Hurt,
+        Dead
+    }
+
+    private ENUM_PlayerState m_State;
+    
+
+    private void Start( ) {
 
         m_Rb = this.gameObject.GetComponent<Rigidbody2D>( );
 
@@ -59,13 +74,32 @@ public class PlayerController : MonoBehaviour {
 
     private void Update( ) {
 
+        switch( m_State ) {
+            case ENUM_PlayerState.Move:
+                break;
+            case ENUM_PlayerState.Jump:
+                isGrounded = false;
+
+                m_Movement.Jump( m_Rb, m_JumpHeight );
+
+                m_Anim.SetBool( "IsGrounded", isGrounded );
+                break;
+            case ENUM_PlayerState.Shoot:
+                break;
+            case ENUM_PlayerState.Hurt:
+                break;
+            case ENUM_PlayerState.Dead:
+                break;
+        }
+
         if( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
 
             isGrounded = false;
 
+            m_Movement.Jump( m_Rb, m_JumpHeight );
+
             m_Anim.SetBool( "IsGrounded", isGrounded );
 
-            m_Movement.Jump( m_Rb, m_JumpHeight );
         }
 
         if( Input.GetKeyDown( KeyCode.Z ) ) {
@@ -87,8 +121,8 @@ public class PlayerController : MonoBehaviour {
         }
 
 		if( m_Health.IsDead( ) ) {
-			ObjectManager.Instance.CreateObj( ENUM_Fx.DeathFx, transform.position );
-			Destroy (this.gameObject);
+			
+			Dead( );
 		}
 			
     }
@@ -96,11 +130,12 @@ public class PlayerController : MonoBehaviour {
     private void FixedUpdate( ) {
         
         isGrounded = Physics2D.OverlapCircle( m_GroundPoint.position, POINT_RADIUS, m_GroundLayer );
+
         m_Anim.SetBool( "IsGrounded", isGrounded );
 
         m_Anim.SetFloat( "JumpVelocity", m_Rb.velocity.y );
 
-        float m_Horizontal = Input.GetAxis( "Horizontal" );
+        m_Horizontal = Input.GetAxis( "Horizontal" );
 
         m_Anim.SetFloat( "Velocity", Mathf.Abs( m_Horizontal ) );
     
@@ -110,9 +145,22 @@ public class PlayerController : MonoBehaviour {
             isFacingRight = !isFacingRight;
             m_Movement.Flip( this.gameObject );
         }
-
-
     }
 
+    public void Dead( ) {
+        ObjectManager.Instance.CreateObj( ENUM_Fx.DeathFx, transform.position );
+        Destroy( this.gameObject );
+    } 
 
+    private void HandleInput( ) {
+        if( m_Horizontal != 0  ) {
+            isRun = true;
+        }
+        if( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
+            isJump = true;
+        }
+        if( Input.GetKeyDown( KeyCode.Z ) ) {
+            isShoot = true;
+        }
+    }
 }

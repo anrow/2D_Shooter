@@ -5,9 +5,6 @@ using UnityEngine;
 public class RocketHit : MonoBehaviour {
     
     [SerializeField]
-    private GameObject mGo_Explosion;
-
-    [SerializeField]
     private float m_Damage;
 
     private RocketController m_RocketController;
