@@ -29,8 +29,8 @@ public class ObjectManager : IObject {
                 theObj = Resources.Load( "Particles/DeathFx" ) as GameObject;
                 break;
 
-            case ENUM_Fx.RocketExplosionFx:
-                theObj = Resources.Load( "Particles/RocketExplosionFx" ) as GameObject;
+            case ENUM_Fx.ExplosionFx:
+                theObj = Resources.Load( "Particles/ExplosionFx" ) as GameObject;
                 break;
         }
 

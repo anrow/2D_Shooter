@@ -19,7 +19,7 @@ public class RocketHit : MonoBehaviour {
 
             m_RocketController.RemoveSpeed( );
 
-            ObjectManager.Instance.CreateObj( ENUM_Fx.RocketExplosionFx, transform.position );
+            ObjectManager.Instance.CreateObj( ENUM_Fx.ExplosionFx, transform.position );
 
             Destroy( m_RocketController.gameObject );
             

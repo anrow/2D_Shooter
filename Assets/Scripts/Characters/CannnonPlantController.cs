@@ -23,8 +23,11 @@ public class CannnonPlantController : MonoBehaviour {
     }
 
     private void OnTriggerStay2D( Collider2D _Other ) {
+
         if( _Other.tag == "Player" && m_NextShootTime <= Time.time ) {
+			
             m_NextShootTime = Time.time + m_ShootTime;
+
             if( Random.Range( 0, 10 ) >= m_ShootRate ) {
                 ObjectManager.Instance.CreateObj( ENUM_Weapon.Spore, m_ShootPoint.position, Quaternion.identity  );
                 m_Anim.SetTrigger( "IsShoot" );

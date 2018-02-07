@@ -2,6 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ENUM_PlayerState {
+	Idle,
+	Move,
+	Jump,
+	Shoot,
+	Hurt,
+	Dead
+}
+
 public class PlayerController : MonoBehaviour {
 
     private Rigidbody2D m_Rb;
@@ -21,15 +30,11 @@ public class PlayerController : MonoBehaviour {
 
     private float m_Horizontal;
 
-    private bool isRun = false;
-
     //Jumping Variables
     [SerializeField]
     private Transform m_GroundPoint;
     
     private bool isGrounded = false;
-    
-    private bool isJump = false;
 
     private const float POINT_RADIUS = 0.2f;
     
@@ -47,19 +52,12 @@ public class PlayerController : MonoBehaviour {
 
     private float m_NextShootTime = 0f;
 
-    private bool isShoot = false;
-
-    public enum ENUM_PlayerState {
-        Idle,
-        Move,
-        Jump,
-        Shoot,
-        Hurt,
-        Dead
-    }
-
     private ENUM_PlayerState m_State;
     
+	public ENUM_PlayerState State {
+		get{ return m_State; }
+		set{ m_State = value; }
+	}
 
     private void Start( ) {
 
@@ -73,94 +71,132 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Update( ) {
+		
+		if( m_Health.IsDead( ) ) {
+			m_State = ENUM_PlayerState.Dead;
+		}
+
+		if( m_Health.IsHurt == true ) {
+			m_State = ENUM_PlayerState.Hurt;
+		}
+
+		HandleInput( );
 
         switch( m_State ) {
-            case ENUM_PlayerState.Move:
+			case ENUM_PlayerState.Idle:
+				m_Health.IsHurt = false;
+				SpriteRenderer theRenderer = this.gameObject.GetComponentInChildren<SpriteRenderer>( );
+				theRenderer.color = new Color( 1, 1, 1, 1 );
+				break;
+			case ENUM_PlayerState.Move:
+				Move( );
                 break;
-            case ENUM_PlayerState.Jump:
-                isGrounded = false;
-
-                m_Movement.Jump( m_Rb, m_JumpHeight );
-
-                m_Anim.SetBool( "IsGrounded", isGrounded );
+			case ENUM_PlayerState.Jump:
+				Jump( );
                 break;
-            case ENUM_PlayerState.Shoot:
+			case ENUM_PlayerState.Shoot:
+				Shoot( );
                 break;
             case ENUM_PlayerState.Hurt:
+				Invincible( );
                 break;
-            case ENUM_PlayerState.Dead:
+			case ENUM_PlayerState.Dead:
+				Dead( );
                 break;
         }
-
-        if( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
-
-            isGrounded = false;
-
-            m_Movement.Jump( m_Rb, m_JumpHeight );
-
-            m_Anim.SetBool( "IsGrounded", isGrounded );
-
-        }
-
-        if( Input.GetKeyDown( KeyCode.Z ) ) {
-
-            if( Time.time > m_NextShootTime ) {
-
-                m_NextShootTime = Time.time + m_ShootRate;
-                
-                if( isFacingRight ) {
-
-                    ObjectManager.Instance.CreateObj( ENUM_Weapon.Rocket, m_ShootPoint.position, Quaternion.Euler( new Vector3( 0, 0, 0 ) ) );
-
-                } else if( !isFacingRight ) {
-
-                    ObjectManager.Instance.CreateObj( ENUM_Weapon.Rocket, m_ShootPoint.position, Quaternion.Euler( new Vector3( 0, 0, 180 ) ) );
-                 
-                }
-            }
-        }
-
-		if( m_Health.IsDead( ) ) {
-			
-			Dead( );
-		}
-			
+		Debug.Log( m_State );	
     }
 
     private void FixedUpdate( ) {
         
         isGrounded = Physics2D.OverlapCircle( m_GroundPoint.position, POINT_RADIUS, m_GroundLayer );
 
+		m_Horizontal = Input.GetAxis( "Horizontal" );
+
         m_Anim.SetBool( "IsGrounded", isGrounded );
 
         m_Anim.SetFloat( "JumpVelocity", m_Rb.velocity.y );
 
-        m_Horizontal = Input.GetAxis( "Horizontal" );
-
-        m_Anim.SetFloat( "Velocity", Mathf.Abs( m_Horizontal ) );
+        //m_Anim.SetFloat( "Velocity", Mathf.Abs( m_Horizontal ) );
     
-        m_Movement.Move( m_Rb, m_MaxSpeed, m_Horizontal );
+        //m_Movement.Move( m_Rb, m_MaxSpeed, m_Horizontal );
         
-        if( m_Horizontal > 0 && !isFacingRight || m_Horizontal < 0 && isFacingRight  ) {
+        /*if( m_Horizontal > 0 && !isFacingRight || m_Horizontal < 0 && isFacingRight  ) {
             isFacingRight = !isFacingRight;
             m_Movement.Flip( this.gameObject );
-        }
+        }*/
     }
+
+	private void HandleInput( ) {
+		if( m_Horizontal != 0 ) {
+			m_State = ENUM_PlayerState.Move;
+		}
+
+		if( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
+			m_State = ENUM_PlayerState.Jump;
+		}
+
+		if( Input.GetKeyDown( KeyCode.Z ) ) {
+			m_State = ENUM_PlayerState.Shoot;
+		}
+	}
 
     public void Dead( ) {
         ObjectManager.Instance.CreateObj( ENUM_Fx.DeathFx, transform.position );
         Destroy( this.gameObject );
     } 
+		
+	private void Jump( ) {
+		
+		isGrounded = false;
 
-    private void HandleInput( ) {
-        if( m_Horizontal != 0  ) {
-            isRun = true;
-        }
-        if( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
-            isJump = true;
-        }
-        if( Input.GetKeyDown( KeyCode.Z ) ) {
-            isShoot = true;
-        }
-    }
+		m_Movement.Jump( m_Rb, m_JumpHeight );
+
+		m_Anim.SetBool( "IsGrounded", isGrounded );
+	}
+
+	private void Shoot( ) {
+		if( Time.time > m_NextShootTime ) {
+
+			m_NextShootTime = Time.time + m_ShootRate;
+
+			if( isFacingRight ) {
+
+				ObjectManager.Instance.CreateObj( ENUM_Weapon.Rocket, m_ShootPoint.position, Quaternion.Euler( Vector3.zero ) );
+
+			} else if( !isFacingRight ) {
+
+				ObjectManager.Instance.CreateObj( ENUM_Weapon.Rocket, m_ShootPoint.position, Quaternion.Euler( new Vector3( 0, 0, 180 ) ) );
+
+			}
+		}
+	}
+
+	private void Move( ) {
+
+		if( m_Horizontal > 0 && !isFacingRight || m_Horizontal < 0 && isFacingRight  ) {
+			isFacingRight = !isFacingRight;
+			m_Movement.Flip( this.gameObject );
+		}
+
+		m_Movement.Move( m_Rb, m_MaxSpeed, m_Horizontal );
+
+		m_Anim.SetFloat( "Velocity", Mathf.Abs( m_Horizontal ) );
+
+	}
+
+	private void Invincible( ) {
+		
+		float theInvincibleTime = Time.time;
+
+		SpriteRenderer theRenderer = this.gameObject.GetComponentInChildren<SpriteRenderer>( );
+	
+		if( theInvincibleTime > 10f ) {
+			m_State = ENUM_PlayerState.Idle;
+		} else {
+			theRenderer.color = Color.Lerp( new Color( 1, 1, 1, 0.2f ), new Color( 1, 1, 1, 1 ), Mathf.PingPong( Time.time, 0.1f ) );
+		}
+
+		Debug.Log( theInvincibleTime );
+	}
 }

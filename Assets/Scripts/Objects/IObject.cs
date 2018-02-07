@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum ENUM_Fx {
-    RocketExplosionFx,
+    ExplosionFx,
     DeathFx
 }
 

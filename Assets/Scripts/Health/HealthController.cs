@@ -25,9 +25,7 @@ public class HealthController : MonoBehaviour {
 
 
 	public float MaxHealth {
-		get {
-			return m_MaxHealth;
-		}
+		get { return m_MaxHealth; }
 	}
 
     public bool IsDead( ) {
@@ -35,12 +33,8 @@ public class HealthController : MonoBehaviour {
     }
 
 	public bool IsHurt {
-		get {
-			return isHurt;
-		}
-		set {
-			isHurt = value;
-		}
+		get { return isHurt; }
+		set { isHurt = value; }
 	}
 
     private void Start( ) {
@@ -49,11 +43,11 @@ public class HealthController : MonoBehaviour {
 
     public void AddDamage( float _DamageVaule ) {
 
-		isHurt = true;
+		if( _DamageVaule <= 0 ) {
+			return;
+		}
 
-        if( _DamageVaule <= 0 ) {
-            return;
-        }
+		isHurt = true;
 
         m_CurrentHealth -= _DamageVaule;
     }
