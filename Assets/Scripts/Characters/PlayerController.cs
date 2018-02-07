@@ -4,10 +4,8 @@ using UnityEngine;
 
 public enum ENUM_PlayerState {
 	Idle,
-	Move,
-	Jump,
-	Shoot,
 	Hurt,
+    Invincible,
 	Dead
 }
 
@@ -52,6 +50,7 @@ public class PlayerController : MonoBehaviour {
 
     private float m_NextShootTime = 0f;
 
+    //PlayerState Variables
     private ENUM_PlayerState m_State;
     
 	public ENUM_PlayerState State {
@@ -59,8 +58,16 @@ public class PlayerController : MonoBehaviour {
 		set{ m_State = value; }
 	}
 
-    private void Start( ) {
+    //Invincible Varables
 
+    private bool isInvincible = false;
+
+    public bool IsInvincible( ) {
+        return isInvincible;
+    }
+
+    private void Start( ) {
+        
         m_Rb = this.gameObject.GetComponent<Rigidbody2D>( );
 
         m_Anim = this.gameObject.GetComponentInChildren<Animator>( );
@@ -71,40 +78,24 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Update( ) {
-		
-		if( m_Health.IsDead( ) ) {
-			m_State = ENUM_PlayerState.Dead;
-		}
-
-		if( m_Health.IsHurt == true ) {
-			m_State = ENUM_PlayerState.Hurt;
-		}
-
+        
 		HandleInput( );
 
         switch( m_State ) {
 			case ENUM_PlayerState.Idle:
-				m_Health.IsHurt = false;
-				SpriteRenderer theRenderer = this.gameObject.GetComponentInChildren<SpriteRenderer>( );
-				theRenderer.color = new Color( 1, 1, 1, 1 );
-				break;
-			case ENUM_PlayerState.Move:
-				Move( );
-                break;
-			case ENUM_PlayerState.Jump:
-				Jump( );
-                break;
-			case ENUM_PlayerState.Shoot:
-				Shoot( );
-                break;
+                 Idle( );
+				 break;
             case ENUM_PlayerState.Hurt:
-				Invincible( );
-                break;
+                
+                 break;
+            case ENUM_PlayerState.Invincible:
+                 Invincible( );
+                 break;
 			case ENUM_PlayerState.Dead:
-				Dead( );
-                break;
+				 Dead( );
+                 break;
         }
-		Debug.Log( m_State );	
+        Debug.Log( m_State );
     }
 
     private void FixedUpdate( ) {
@@ -127,25 +118,37 @@ public class PlayerController : MonoBehaviour {
         }*/
     }
 
-	private void HandleInput( ) {
-		if( m_Horizontal != 0 ) {
-			m_State = ENUM_PlayerState.Move;
-		}
-
-		if( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
-			m_State = ENUM_PlayerState.Jump;
-		}
-
-		if( Input.GetKeyDown( KeyCode.Z ) ) {
-			m_State = ENUM_PlayerState.Shoot;
-		}
+    private void HandleInput() {
+        if( m_Horizontal != 0 ) {
+            Move( );
+        }
+        if ( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
+            Jump( );
+        }
+        if ( Input.GetKeyDown( KeyCode.Z ) ) {
+            Shoot( );
+        }
+        if ( m_Health.IsDead( ) ) {
+			m_State = ENUM_PlayerState.Dead;
+		} else if ( m_Health.IsHurt && !isInvincible ) {
+			m_State = ENUM_PlayerState.Invincible;
+        } else {
+            m_State = ENUM_PlayerState.Idle;
+        }
+        
 	}
 
     public void Dead( ) {
         ObjectManager.Instance.CreateObj( ENUM_Fx.DeathFx, transform.position );
         Destroy( this.gameObject );
     } 
-		
+	
+    private void Idle( ) {
+        m_Health.IsHurt = false;
+        SpriteRenderer theRenderer = this.gameObject.GetComponentInChildren<SpriteRenderer>( );
+        theRenderer.color = new Color( 1, 1, 1, 1 );
+    }
+    	
 	private void Jump( ) {
 		
 		isGrounded = false;
@@ -153,6 +156,7 @@ public class PlayerController : MonoBehaviour {
 		m_Movement.Jump( m_Rb, m_JumpHeight );
 
 		m_Anim.SetBool( "IsGrounded", isGrounded );
+
 	}
 
 	private void Shoot( ) {
@@ -186,17 +190,19 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	private void Invincible( ) {
-		
-		float theInvincibleTime = Time.time;
 
+        int timeCount = 0;
+        timeCount++;
+        isInvincible = true;
+        
 		SpriteRenderer theRenderer = this.gameObject.GetComponentInChildren<SpriteRenderer>( );
-	
-		if( theInvincibleTime > 10f ) {
-			m_State = ENUM_PlayerState.Idle;
-		} else {
-			theRenderer.color = Color.Lerp( new Color( 1, 1, 1, 0.2f ), new Color( 1, 1, 1, 1 ), Mathf.PingPong( Time.time, 0.1f ) );
-		}
+        if( timeCount < 200 ) {
+	        theRenderer.color = Color.Lerp( new Color( 1, 1, 1, 1 ), Color.clear, Mathf.PingPong( Time.time, 0.1f ) );
+        } else {
 
-		Debug.Log( theInvincibleTime );
-	}
+            isInvincible = false;
+        }
+
+        Debug.Log( timeCount );
+    }
 }

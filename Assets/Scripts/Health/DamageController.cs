@@ -27,13 +27,14 @@ public class DamageController : MonoBehaviour {
 
 			HealthController thePlayerHealth = _Other.gameObject.GetComponent<HealthController>( );
 
-			theplayer.State = ENUM_PlayerState.Hurt;
-
-			thePlayerHealth.AddDamage( m_Damage );
+		    if( !theplayer.IsInvincible( ) ) {
+                thePlayerHealth.IsHurt = true;
+			    thePlayerHealth.AddDamage( m_Damage );
+            }
 
 			m_NextDamageTime = Time.time + m_DamageRate;
 
-			PushBack (_Other.transform);
+			//PushBack (_Other.transform);
 
 		}
 	}
