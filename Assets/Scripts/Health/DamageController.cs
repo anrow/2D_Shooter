@@ -20,48 +20,51 @@ public class DamageController : MonoBehaviour {
 		m_NextDamageTime = 0;
 	}
 
-	void OnTriggerEnter2D( Collider2D _Other ) {
+    void OnTriggerEnter2D( Collider2D _Other ) {
+
 		if( _Other.gameObject.tag == "Player" ) {
 
 			PlayerController theplayer = _Other.gameObject.GetComponent<PlayerController>( );
 
 			HealthController thePlayerHealth = _Other.gameObject.GetComponent<HealthController>( );
 
-		    if( !theplayer.IsInvincible( ) ) {
-                thePlayerHealth.IsHurt = true;
+            if( !theplayer.IsInvincible( ) ) {
 			    thePlayerHealth.AddDamage( m_Damage );
+                PushBack( _Other.transform );
             }
 
 			m_NextDamageTime = Time.time + m_DamageRate;
-
-			//PushBack (_Other.transform);
-
 		}
 	}
 
 	void OnTriggerStay2D( Collider2D _Other ) {
-		/*if( _Other.gameObject.tag == "Player" && m_NextDamageTime < Time.time ) {
+
+		if( _Other.gameObject.tag == "Player" ) {
+
+            PlayerController theplayer = _Other.gameObject.GetComponent<PlayerController>( );
+
 			HealthController thePlayerHealth = _Other.gameObject.GetComponent<HealthController>( );
 
-			thePlayerHealth.AddDamage( m_Damage );
-	
-			m_NextDamageTime = Time.time + m_DamageRate;
-
-			PushBack (_Other.transform);
-
-		}*/
+			if( !theplayer.IsInvincible( ) ) {
+			    thePlayerHealth.AddDamage( m_Damage );
+                PushBack( _Other.transform );
+            }
+		}
 
 	}
 
 	void PushBack( Transform _Target ) {
-		Vector2 thePushDirection = new Vector2( 0, _Target.position.y - transform.position.y ).normalized;
 
-		thePushDirection *= m_PushBackForce;
+		Vector2 thePushDirection = new Vector2( _Target.position.x - transform.position.x, _Target.position.y - transform.position.y ).normalized;
+
+        float thePushBackForce = new Vector2( _Target.position.x - transform.position.x, _Target.position.y - transform.position.y ).sqrMagnitude;
+
+		thePushDirection *= thePushBackForce + m_PushBackForce;
 
 		Rigidbody2D theTargetRb = _Target.gameObject.GetComponent<Rigidbody2D>( );
 
 		theTargetRb.velocity = Vector2.zero;
 
-		theTargetRb.AddForce (thePushDirection, ForceMode2D.Impulse);
+		theTargetRb.AddForce( thePushDirection, ForceMode2D.Impulse );
 	}
 }

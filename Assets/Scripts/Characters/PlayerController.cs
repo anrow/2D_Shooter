@@ -28,11 +28,21 @@ public class PlayerController : MonoBehaviour {
 
     private float m_Horizontal;
 
+    private bool isMove;
+
+    private bool isOnMovingPlatform;
+
+    public bool IsOnMovingPlatform( ) {
+        return isOnMovingPlatform;
+    }
+
     //Jumping Variables
     [SerializeField]
     private Transform m_GroundPoint;
     
     private bool isGrounded = false;
+
+    private bool isJump;
 
     private const float POINT_RADIUS = 0.2f;
     
@@ -50,16 +60,16 @@ public class PlayerController : MonoBehaviour {
 
     private float m_NextShootTime = 0f;
 
-    //PlayerState Variables
-    private ENUM_PlayerState m_State;
-    
-	public ENUM_PlayerState State {
-		get{ return m_State; }
-		set{ m_State = value; }
-	}
+    private bool isShoot;
+
+    //Death Variables
+    private bool isDead( ) {
+        return m_Health.IsDead( );
+    }
+
+    //Hurt Variales    
 
     //Invincible Varables
-
     private bool isInvincible = false;
 
     public bool IsInvincible( ) {
@@ -80,74 +90,69 @@ public class PlayerController : MonoBehaviour {
     private void Update( ) {
         
 		HandleInput( );
-
-        switch( m_State ) {
-			case ENUM_PlayerState.Idle:
-                 Idle( );
-				 break;
-            case ENUM_PlayerState.Hurt:
-                
-                 break;
-            case ENUM_PlayerState.Invincible:
-                 Invincible( );
-                 break;
-			case ENUM_PlayerState.Dead:
-				 Dead( );
-                 break;
+        
+        if( isDead( ) ) {
+            Dead( );
+           
         }
-        Debug.Log( m_State );
+        if( m_Health.IsHurt && !isDead( ) ) {
+            
+            StartCoroutine( SetInvincible( ) );
+            m_Health.IsHurt = false;
+        }
+
     }
 
     private void FixedUpdate( ) {
-        
+
+        m_Horizontal = Input.GetAxis( "Horizontal" );
+
         isGrounded = Physics2D.OverlapCircle( m_GroundPoint.position, POINT_RADIUS, m_GroundLayer );
 
-		m_Horizontal = Input.GetAxis( "Horizontal" );
+        if( isMove && !isDead( ) ) {
+            Move( );
+        }
+
+        if( isJump && !isDead( ) ) {
+            Jump( );
+        }
+        if( isShoot && !isDead( ) ) {
+            Shoot( );
+        }
 
         m_Anim.SetBool( "IsGrounded", isGrounded );
 
         m_Anim.SetFloat( "JumpVelocity", m_Rb.velocity.y );
 
-        //m_Anim.SetFloat( "Velocity", Mathf.Abs( m_Horizontal ) );
-    
-        //m_Movement.Move( m_Rb, m_MaxSpeed, m_Horizontal );
-        
-        /*if( m_Horizontal > 0 && !isFacingRight || m_Horizontal < 0 && isFacingRight  ) {
-            isFacingRight = !isFacingRight;
-            m_Movement.Flip( this.gameObject );
-        }*/
+        ResetInputVaule(  );
+
     }
 
-    private void HandleInput() {
+    private void HandleInput( ) {
+
         if( m_Horizontal != 0 ) {
-            Move( );
+            isMove = true;
         }
-        if ( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
-            Jump( );
+        if( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
+            isJump = true;
         }
         if ( Input.GetKeyDown( KeyCode.Z ) ) {
-            Shoot( );
+            isShoot = true;
         }
-        if ( m_Health.IsDead( ) ) {
-			m_State = ENUM_PlayerState.Dead;
-		} else if ( m_Health.IsHurt && !isInvincible ) {
-			m_State = ENUM_PlayerState.Invincible;
-        } else {
-            m_State = ENUM_PlayerState.Idle;
-        }
-        
 	}
+
+    private void ResetInputVaule( ) {
+        isMove = false;
+        isJump = false;
+        isShoot = false;
+    } 
 
     public void Dead( ) {
         ObjectManager.Instance.CreateObj( ENUM_Fx.DeathFx, transform.position );
         Destroy( this.gameObject );
+
+        GameManager.Instance.GameOver( );
     } 
-	
-    private void Idle( ) {
-        m_Health.IsHurt = false;
-        SpriteRenderer theRenderer = this.gameObject.GetComponentInChildren<SpriteRenderer>( );
-        theRenderer.color = new Color( 1, 1, 1, 1 );
-    }
     	
 	private void Jump( ) {
 		
@@ -188,21 +193,40 @@ public class PlayerController : MonoBehaviour {
 		m_Anim.SetFloat( "Velocity", Mathf.Abs( m_Horizontal ) );
 
 	}
-
-	private void Invincible( ) {
-
-        int timeCount = 0;
-        timeCount++;
+    private IEnumerator SetInvincible( ) {
         isInvincible = true;
-        
-		SpriteRenderer theRenderer = this.gameObject.GetComponentInChildren<SpriteRenderer>( );
-        if( timeCount < 200 ) {
-	        theRenderer.color = Color.Lerp( new Color( 1, 1, 1, 1 ), Color.clear, Mathf.PingPong( Time.time, 0.1f ) );
-        } else {
+        int damageTimeCount = 20;
 
+		while ( damageTimeCount >= 0 ) {
+			
+			gameObject.GetComponentInChildren<SpriteRenderer>( ).color = new Color( 1, 1, 1, 0 );
+			
+			yield return new WaitForSeconds( 0.05f );
+			
+			gameObject.GetComponentInChildren<SpriteRenderer>( ).color = new Color( 1, 1, 1, 1 );
+			
+			yield return new WaitForSeconds( 0.05f );
+			damageTimeCount--;
+		}
+        if( damageTimeCount <= 0 ) {
             isInvincible = false;
         }
-
-        Debug.Log( timeCount );
     }
+
+    private void OnCollisionEnter2D( Collision2D _Other ){
+
+        if( _Other.gameObject.layer == LayerMask.NameToLayer( "MovingGround" ) ) {
+            transform.parent = _Other.transform;
+            isOnMovingPlatform = true;
+        }
+
+    }
+    private void OnCollisionExit2D( Collision2D _Other ) {
+		
+		if ( _Other.gameObject.layer == LayerMask.NameToLayer( "MovingGround" ) ) {
+			transform.parent = null;
+            isOnMovingPlatform = false;
+		}
+
+	}
 }

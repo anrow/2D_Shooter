@@ -6,16 +6,13 @@ using UnityEngine.UI;
 public class DamageScreenPanel : MonoBehaviour {
 
 	[SerializeField]
-	private HealthController m_Player;
+	private HealthController m_PlayerHealth;
 
 	[SerializeField]
 	private Image m_DamageScreenImage;
 
 	[SerializeField]
-	private Color m_DamageColor = new Color( 0, 0, 0, 1f );
-
-	[SerializeField]
-	private Color m_DangerColor = new Color( 0.5f, 0.5f, 0.5f, 1 );
+	private Color m_DangerColor = new Color( 1f, 1f, 1f, 1f );
 
 	[SerializeField]
 	private float m_SmoothColorRate;
@@ -25,21 +22,20 @@ public class DamageScreenPanel : MonoBehaviour {
 		
 		m_DamageScreenImage = this.gameObject.GetComponent<Image> ();
 
-		m_Player = GameObject.FindGameObjectWithTag ("Player").GetComponent<HealthController> ();
+		m_PlayerHealth = GameObject.FindGameObjectWithTag ("Player").GetComponent<HealthController> ();
 	
 	}
 	// Update is called once per frame
-	void Update () {
-		
-		/*if ( m_Player.IsHurt == true ) {
+	void Update( ) {
+		if( !m_PlayerHealth.IsDead( ) ) {
+		    if( m_PlayerHealth.CurrentHealth <= 5 ) {
 
-			m_DamageScreenImage.color = m_DamageColor;
+                float alfa = Mathf.PingPong( Time.time, 1 );
+                m_DamageScreenImage.color = new Color( 1, 1, 1, alfa );
 
-		}  else {
-
-			m_DamageScreenImage.color = Color.Lerp( m_DamageScreenImage.color, Color.clear, m_SmoothColorRate * Time.deltaTime );
-		}
-
-		m_Player.IsHurt = false;*/
-	}
+            } else {
+                m_DamageScreenImage.color = Color.clear;
+            }
+        }
+    }
 }

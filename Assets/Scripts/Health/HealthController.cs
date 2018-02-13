@@ -10,45 +10,30 @@ public class HealthController : MonoBehaviour {
 	[SerializeField]
     private float m_CurrentHealth;
 
-    private bool isDead = false;
-
-	private bool isHurt = false;
-
 	public float CurrentHealth {
-		get {
-			return m_CurrentHealth;
-		}
-		set {
-			m_CurrentHealth = value;
-		}
+		get { return m_CurrentHealth; }
+		set { m_CurrentHealth = value; }
 	}
-
 
 	public float MaxHealth {
 		get { return m_MaxHealth; }
 	}
 
+    private bool isHurt;
+    public bool IsHurt {
+        get { return isHurt; }
+        set { isHurt = value; }
+    }
+
     public bool IsDead( ) {
 		return m_CurrentHealth <= 0;
     }
 
-	public bool IsHurt {
-		get { return isHurt; }
-		set { isHurt = value; }
-	}
-
-    private void Start( ) {
-        m_CurrentHealth = m_MaxHealth;
-    }
-
     public void AddDamage( float _DamageVaule ) {
-
 		if( _DamageVaule <= 0 ) {
 			return;
 		}
-
-		isHurt = true;
-
+        isHurt = true;
         m_CurrentHealth -= _DamageVaule;
     }
 
@@ -60,4 +45,9 @@ public class HealthController : MonoBehaviour {
            m_CurrentHealth = m_MaxHealth;
         }
     }
+
+    private void Start( ) {
+        m_CurrentHealth = m_MaxHealth;
+    }
+
 }

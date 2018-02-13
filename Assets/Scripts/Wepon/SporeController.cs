@@ -28,20 +28,20 @@ public class SporeController : MonoBehaviour {
         m_Rb.AddForce( new Vector2( Random.Range( -m_Angle, m_Angle ), Random.Range( m_MinSpeed, m_MaxSpeed ) ), ForceMode2D.Impulse );
 
         m_Rb.AddTorque( Random.Range( -m_Torque, m_Torque ) );
+
+        Destroy( this.gameObject, 3f );
     }
 
 	private void OnTriggerEnter2D( Collider2D _Other ) {
 
-		if( !_Other.gameObject.GetComponent<Collider2D>( ).isTrigger ) {
-			/*if( _Other.gameObject.tag == "player" ) {
-				HealthController thePlayerHealth = _Other.gameObject.GetComponent<HealthController>( );
-				thePlayerHealth.AddDamage( m_Damage );
-			}*/
+        if( _Other.gameObject.tag == "Player" ) {
 
-			ObjectManager.Instance.CreateObj( ENUM_Fx.ExplosionFx, transform.position );
-
-			Destroy( this.gameObject );
-		}
+			HealthController thePlayerHealth = _Other.gameObject.GetComponent<HealthController>( );
+			thePlayerHealth.AddDamage( m_Damage );
+            ObjectManager.Instance.CreateObj( ENUM_Fx.ExplosionFx, transform.position );
+            Destroy( this.gameObject );
+        }
+      
 	}
 }
 

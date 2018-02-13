@@ -15,23 +15,25 @@ public class RocketHit : MonoBehaviour {
 
     private void OnTriggerEnter2D( Collider2D _Other ){
 
-        if( _Other.gameObject.layer == LayerMask.NameToLayer( "ShootAble" ) ) {
+        if( _Other.gameObject.tag != "Player" ) {
 
-            m_RocketController.RemoveSpeed( );
+            if( _Other.gameObject.layer == LayerMask.NameToLayer( "ShootAble" ) ) {
 
-            ObjectManager.Instance.CreateObj( ENUM_Fx.ExplosionFx, transform.position );
-
-            Destroy( m_RocketController.gameObject );
-            
-            if( _Other.gameObject.tag == "Enemy" ) {
-
+                m_RocketController.RemoveSpeed( );
+                
                 HealthController theEnemyHealth = _Other.gameObject.GetComponent<HealthController>( );
+
+                if( theEnemyHealth == null ) {
+                    theEnemyHealth = _Other.gameObject.GetComponentInParent<HealthController>( );
+                }
+                if( theEnemyHealth == null ) {
+                    theEnemyHealth = _Other.gameObject.GetComponentInChildren<HealthController>( );
+                }
 
                 theEnemyHealth.AddDamage( m_Damage );
 
-                if( theEnemyHealth.IsDead( ) ) {
-                    Destroy( _Other.gameObject );
-                }
+                Destroy( m_RocketController.gameObject );
+                ObjectManager.Instance.CreateObj( ENUM_Fx.ExplosionFx, transform.position );
             }
         }
     }
