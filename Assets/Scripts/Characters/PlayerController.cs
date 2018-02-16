@@ -62,12 +62,19 @@ public class PlayerController : MonoBehaviour {
 
     private bool isShoot;
 
+    //Chop Variables
+    private bool isChop = false;
+
+    //JumpKick Variables
+    private bool isJumpKick = false;
+
+    [SerializeField]
+    private float m_JumpKickForce;
+
     //Death Variables
     private bool isDead( ) {
         return m_Health.IsDead( );
-    }
-
-    //Hurt Variales    
+    }  
 
     //Invincible Varables
     private bool isInvincible = false;
@@ -93,44 +100,49 @@ public class PlayerController : MonoBehaviour {
         
         if( isDead( ) ) {
             Dead( );
-           
         }
         if( m_Health.IsHurt && !isDead( ) ) {
             
             StartCoroutine( SetInvincible( ) );
             m_Health.IsHurt = false;
         }
-
+        
     }
 
     private void FixedUpdate( ) {
-
+ 
         m_Horizontal = Input.GetAxis( "Horizontal" );
 
         isGrounded = Physics2D.OverlapCircle( m_GroundPoint.position, POINT_RADIUS, m_GroundLayer );
 
-        if( isMove && !isDead( ) ) {
+        if( isMove ) {
             Move( );
         }
 
-        if( isJump && !isDead( ) ) {
-            Jump( );
+        if( isJump ) {
+            Jump( );     
         }
-        if( isShoot && !isDead( ) ) {
+        if( isChop ) {
+            m_Anim.SetTrigger( "Chop" );
+        }
+        if( isShoot ) {
             Shoot( );
+        }
+        if( isJumpKick ) {
+            JumpKick( );
         }
 
         m_Anim.SetBool( "IsGrounded", isGrounded );
 
         m_Anim.SetFloat( "JumpVelocity", m_Rb.velocity.y );
 
-        ResetInputVaule(  );
+        ResetInputVaule( );
 
     }
 
     private void HandleInput( ) {
-
-        if( m_Horizontal != 0 ) {
+        
+        if( m_Horizontal != 0 && !isChop ) {
             isMove = true;
         }
         if( Input.GetKeyDown( KeyCode.Space ) && isGrounded ) {
@@ -139,11 +151,20 @@ public class PlayerController : MonoBehaviour {
         if ( Input.GetKeyDown( KeyCode.Z ) ) {
             isShoot = true;
         }
+        if( Input.GetKeyDown( KeyCode.C ) && isGrounded ) {
+            isChop = true;
+        }
+        
+        if( Input.GetKeyDown( KeyCode.C ) && !isGrounded ) {
+            isJumpKick = true;  
+        }
 	}
 
     private void ResetInputVaule( ) {
         isMove = false;
         isJump = false;
+        isJumpKick = false;
+        isChop = false;
         isShoot = false;
     } 
 
@@ -163,6 +184,15 @@ public class PlayerController : MonoBehaviour {
 		m_Anim.SetBool( "IsGrounded", isGrounded );
 
 	}
+
+    private void JumpKick( ) {
+
+        int theDirX = isFacingRight ? 1 : -1;
+
+        m_Rb.velocity = new Vector2(theDirX * m_JumpKickForce, -1 * m_JumpKickForce );
+
+        m_Anim.SetTrigger( "JumpKick" );
+    }
 
 	private void Shoot( ) {
 		if( Time.time > m_NextShootTime ) {

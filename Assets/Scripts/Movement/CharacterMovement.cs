@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CharacterMovement : ICharacterMovement {
-
+        
     public override void Move( Rigidbody2D _Rb, float _Speed, float _Horizontal ) {
         _Rb.velocity = new Vector2( _Horizontal * _Speed, _Rb.velocity.y );
     }
@@ -28,7 +28,7 @@ public class CharacterMovement : ICharacterMovement {
         
 	}
 
-    public override void MoveByPoint( Vector3 _StartPoint, Vector3 _EndPoint, float t) {
+    public override void MoveByPoint( Vector3 _StartPoint, Vector3 _EndPoint, float t ) { 
 
         _StartPoint = Vector3.MoveTowards( _StartPoint, _EndPoint, t );
         
