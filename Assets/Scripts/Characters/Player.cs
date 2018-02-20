@@ -2,26 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour {
+public class Player : Character {
     
     private Rigidbody2D m_Rb;
-
-    private Animator m_Anim;
 
     //Input Variables
     private float m_Horizontal;
 
-    //Movement Variables
-    [SerializeField]
-    private float m_MovementSpeed;
-
-    private bool isFacingRight;
-
-    //Attack Variables
-    private bool isPunch;
-
+    //JumpAttack Variables
     private bool isJumpKick;
-
     [SerializeField]
     private float m_JumpKickForce;
 
@@ -43,11 +32,42 @@ public class Player : MonoBehaviour {
     [SerializeField]
     private float m_JumpForce;
 
-    private void Start( ) {
+    private static Player instance;
 
-        m_Rb = gameObject.GetComponent<Rigidbody2D>( );
+    public static Player Instance {
+        get {
+            if( instance == null ) {
+                instance = GameObject.FindObjectOfType<Player>( );
+            }
+            return instance;
+        }
+    }
 
-        m_Anim = gameObject.GetComponentInChildren<Animator>( );
+    public bool OnGround {
+        get { return isGrounded; }
+        set { isGrounded = value; }
+    }
+
+    public bool IsJumpKick {
+        get { return isJumpKick; }
+        set { isJumpKick = value; }
+    }
+
+    public bool IsJump {
+        get { return isJump; }
+        set { isJump = value; }
+    }
+
+    public Rigidbody2D Rb {
+        get { return m_Rb; }
+        set { m_Rb = value; }
+    }
+
+    public override void Start( ) {
+
+        base.Start( );
+
+        Rb = gameObject.GetComponent<Rigidbody2D>( );
 
         isFacingRight = true;
 
@@ -67,73 +87,47 @@ public class Player : MonoBehaviour {
         
         Flip( );
 
-        HandleAttacks( );
-
         HandleLayers( );
 
-        ResetInputVaules( );
     }
 
     private void HandleInput( ) {
         if( Input.GetKeyDown( KeyCode.C ) ) {
-            isPunch = true;
+   
+            Anim.SetTrigger( "Attack" );
         }
         if( Input.GetKeyDown( KeyCode.Space ) ) {
-            isJump = true;
+        
+            Anim.SetTrigger( "Jump" );
         }
         if( Input.GetKeyDown( KeyCode.C ) && !isGrounded ) {
-            isJumpKick = true;
+          
+            Anim.SetTrigger( "Attack" );
         }
     }
 
     private void HandleMovement( float _Horizontal ) {
 
-        if( !m_Anim.GetCurrentAnimatorStateInfo( 0 ).IsTag( "Attack" ) ) {
+        if( !isAttack ) {
+            Rb.velocity = new Vector2( _Horizontal * m_MovementSpeed, Rb.velocity.y );
+        }
+        if( isJump && m_Rb.velocity.y == 0 ) {
 
-             m_Rb.velocity = new Vector2( _Horizontal * m_MovementSpeed, m_Rb.velocity.y );
-
+            Rb.AddForce( new Vector2( 0, m_JumpForce ) );
         }
 
-        if( isGrounded && isJump ) {
-            isGrounded = false;
-            m_Rb.AddForce( new Vector2( 0, m_JumpForce ) );
-            m_Anim.SetTrigger( "JumpUp" );
+        if( isAttack && m_Rb.velocity.y != 0 ) {
+            m_Rb.velocity = new Vector2( transform.localScale.x * m_JumpKickForce, -m_JumpKickForce );
         }
 
-        m_Anim.SetFloat( "Velocity", Mathf.Abs( m_Horizontal ) );
-        m_Anim.SetBool( "IsGrounded", m_Rb.velocity.y == 0 );
+        Anim.SetFloat( "Velocity", Mathf.Abs( m_Horizontal ) );
+   
     }
 
     private void Flip( ) {
 
-        const int m_DIR = -1;
-
         if( m_Horizontal > 0 && !isFacingRight || m_Horizontal < 0 && isFacingRight ) {
-
-            isFacingRight = !isFacingRight;
-
-            Vector3 theScale = this.gameObject.transform.localScale;
-
-            theScale.x *= m_DIR;
-
-            this.gameObject.transform.localScale = theScale;
-
-        }
-
-    }
-
-    private void HandleAttacks( ) {
-
-        if( isPunch && !m_Anim.GetCurrentAnimatorStateInfo( 0 ).IsTag( "Attack" ) ) {
-            m_Anim.SetTrigger( "Chop" );
-            m_Rb.velocity = Vector2.zero;
-        }
-        if( isJumpKick && !m_Anim.GetCurrentAnimatorStateInfo( 0 ).IsTag( "Attack" ) ) {
-            m_Anim.SetTrigger( "JumpKick" );
-            m_Rb.velocity = new Vector2( transform.lossyScale.x * m_JumpKickForce, -m_JumpKickForce );
-            if( isGrounded ) {
-                m_Rb.velocity = Vector2.zero;
-            }
+            ChangeDirection( );
         }
 
     }
@@ -142,19 +136,13 @@ public class Player : MonoBehaviour {
 
         int m_Weight = isGrounded ? 0 : 1;
        
-        m_Anim.SetLayerWeight( 1, m_Weight );
+        Anim.SetLayerWeight( 1, m_Weight );
         
-    }
-
-    private void ResetInputVaules( ) {
-        isPunch = false;
-        isJump = false;
-        isJumpKick = false;
     }
 
     private bool IsGrounded( ) {
 
-        if( m_Rb.velocity.y <= 0 ) {
+        if( Rb.velocity.y <= 0 ) {
 
             foreach( Transform _Point in m_GroundPoints ) {
 
@@ -165,9 +153,7 @@ public class Player : MonoBehaviour {
                         return true;
                     }
                 }
-
             }
-
         }
         return false;
     }
