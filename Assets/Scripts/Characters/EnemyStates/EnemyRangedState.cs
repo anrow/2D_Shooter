@@ -11,6 +11,20 @@ public class EnemyRangedState : IEnemyState {
     }
 
     public void Execute( ) {
+
+        if( m_Enemy.InAttackRange ) {
+            m_Enemy.ChangeState( new EnemyAttackState( ) );
+        }
+
+        else if( m_Enemy.SightTarget != null ) {
+
+            m_Enemy.Move( );
+
+        }
+
+        else {
+            m_Enemy.ChangeState( new EnemyIdleState( ) );
+        }
     }
 
     public void Exit( ) {

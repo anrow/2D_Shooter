@@ -7,12 +7,16 @@ public class AttackBeheviour : StateMachineBehaviour {
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter( Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
 
-        Player.Instance.IsAttack = true;
+        animator.GetComponentInParent<Character>( ).IsAttack = true;
 
-        if( Player.Instance.OnGround ) {
-            Player.Instance.Rb.velocity = Vector2.zero;
+        switch( animator.transform.parent.tag ) {
+            case "Player":              
+                if( Player.Instance.OnGround ) {
+                    Player.Instance.Rb.velocity = Vector2.zero;
+                }
+
+                break;
         }
-
     }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
@@ -22,7 +26,7 @@ public class AttackBeheviour : StateMachineBehaviour {
 
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit( Animator animator, AnimatorStateInfo stateInfo, int layerIndex ) {
-        Player.Instance.IsAttack = false;
+        animator.GetComponentInParent<Character>( ).IsAttack = false;
         animator.ResetTrigger( "Attack" );
     }
 

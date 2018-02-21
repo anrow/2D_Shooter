@@ -30,16 +30,16 @@ public class CameraController : MonoBehaviour {
 			return;
 		}
 		Vector3 targetCamPos = m_Target.position + m_Offset;
-
+        m_LerpRate = 1;
         transform.position = Vector3.Lerp( transform.position, targetCamPos, m_LerpRate * Time.deltaTime );
 
         if( transform.position.y < m_LowY ) {
             transform.position = new Vector3( transform.position.x, m_LowY, transform.position.z );
         }
-        if( m_Target.GetComponent<PlayerController>( ).IsOnMovingPlatform( ) ) {
+        /*if( m_Target.GetComponent<PlayerController>( ).IsOnMovingPlatform( ) ) {
             m_LerpRate = 1;
         } else {
             m_LerpRate = 100;
-        }
+        }*/
 	}
 }

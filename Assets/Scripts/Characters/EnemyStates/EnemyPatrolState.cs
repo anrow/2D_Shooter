@@ -15,6 +15,14 @@ public class EnemyPatrolState : IEnemyState {
     }
 
     public void Execute( ) {
+
+        Patrol( );
+
+        m_Enemy.Move( );
+
+        if( m_Enemy.SightTarget != null ) {
+            m_Enemy.ChangeState( new EnemyRangedState( ) );
+        }
     }
 
     public void Exit( ) {

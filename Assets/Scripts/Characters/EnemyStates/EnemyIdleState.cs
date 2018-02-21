@@ -8,7 +8,7 @@ public class EnemyIdleState : IEnemyState {
 
     private float m_Timer;
 
-    private const float m_Duration = 5f;
+    private float m_Duration = 0.5f;
 
     public void Enter( Enemy _Enemy ) {
         this.m_Enemy = _Enemy;
@@ -16,6 +16,10 @@ public class EnemyIdleState : IEnemyState {
 
     public void Execute( ) {
         Idle( );
+
+        if( m_Enemy.SightTarget != null ) {
+            m_Enemy.ChangeState( new EnemyPatrolState( ) );
+        }
     }
 
     public void Exit( ) {
