@@ -14,6 +14,13 @@ public abstract class Character : MonoBehaviour {
     //Attack Variables
     protected bool isAttack;
 
+    public bool IsAttack {
+        get { return isAttack; }
+        set { isAttack = value; }
+    }
+
+
+    //Animate
     protected Animator m_Anim;
 
     public Animator Anim {
@@ -21,14 +28,17 @@ public abstract class Character : MonoBehaviour {
         private set { m_Anim = value; }
     }
 
+    //HealthControll
+    protected HealthController m_HealthCtrl;
+
     public virtual void Start( ) {
+
         m_Anim = GetComponentInChildren<Animator>( );
+
+        m_HealthCtrl = GetComponent<HealthController>( );
+
     }
 
-    public bool IsAttack {
-        get { return isAttack; }
-        set { isAttack = value; }
-    }
 
     public void ChangeDirection( ) {
         const int THE_DIR = -1;
@@ -39,6 +49,10 @@ public abstract class Character : MonoBehaviour {
         theScale.x *= THE_DIR;
 
         this.gameObject.transform.localScale = theScale;
+    }
+
+    public virtual void Death( ) {
+        Destroy( this.gameObject, 1f );
     }
 
 }

@@ -24,11 +24,11 @@ public class DamageController : MonoBehaviour {
 
 		if( _Other.gameObject.tag == "Player" ) {
 
-			PlayerController theplayer = _Other.gameObject.GetComponent<PlayerController>( );
+			Player theplayer = _Other.gameObject.GetComponent<Player>( );
 
 			HealthController thePlayerHealth = _Other.gameObject.GetComponent<HealthController>( );
 
-            if( !theplayer.IsInvincible( ) ) {
+            if( !theplayer.IsInvincible ) {
 			    thePlayerHealth.AddDamage( m_Damage );
                 PushBack( _Other.transform );
             }
@@ -41,11 +41,11 @@ public class DamageController : MonoBehaviour {
 
 		if( _Other.gameObject.tag == "Player" ) {
 
-            PlayerController theplayer = _Other.gameObject.GetComponent<PlayerController>( );
+            Player theplayer = _Other.gameObject.GetComponent<Player>( );
 
 			HealthController thePlayerHealth = _Other.gameObject.GetComponent<HealthController>( );
 
-			if( !theplayer.IsInvincible( ) ) {
+			if( !theplayer.IsInvincible ) {
 			    thePlayerHealth.AddDamage( m_Damage );
                 PushBack( _Other.transform );
             }

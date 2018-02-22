@@ -32,6 +32,7 @@ public class Enemy : Character {
     public override void Start( ) {
 
         base.Start( );
+        
         ChangeState( new EnemyIdleState( ) );
     }
 

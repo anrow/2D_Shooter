@@ -32,6 +32,17 @@ public class Player : Character {
     [SerializeField]
     private float m_JumpForce;
 
+    //Invincible State Variables
+    private bool isInvincible;
+
+    public bool IsInvincible {
+        get { return isInvincible; }
+        set { isInvincible = value; }
+    }
+
+    [SerializeField]
+    private float m_InvincibleTime;
+
     private static Player instance;
 
     public static Player Instance {
@@ -66,15 +77,23 @@ public class Player : Character {
     public override void Start( ) {
 
         base.Start( );
-
-        Rb = gameObject.GetComponent<Rigidbody2D>( );
+        
+        m_Rb = gameObject.GetComponent<Rigidbody2D>( );
 
         isFacingRight = true;
 
     }
 
     private void Update( ) {
+
         HandleInput( );
+
+        if( m_HealthCtrl.IsHurt && !m_HealthCtrl.IsDead( ) ) {
+        StartCoroutine( SetInvincible( ) );
+        }
+        if( m_HealthCtrl.IsDead( ) ) {
+           
+        }
     }
 
     private void FixedUpdate( ) {
@@ -136,7 +155,7 @@ public class Player : Character {
 
         int m_Weight = isGrounded ? 0 : 1;
        
-        Anim.SetLayerWeight( 1, m_Weight );
+        m_Anim.SetLayerWeight( 1, m_Weight );
         
     }
 
@@ -156,5 +175,36 @@ public class Player : Character {
             }
         }
         return false;
+    }
+
+    private IEnumerator SetInvincible( ) {
+
+        IsInvincible = true;
+
+        int damageTimeCount = 20;
+
+		while ( damageTimeCount >= 0 ) {
+			
+            foreach( SpriteRenderer theRenderer in gameObject.GetComponentsInChildren<SpriteRenderer>( ) ) {
+                theRenderer.color = new Color( 1, 1, 1, 0 );
+
+                yield return new WaitForSeconds( 0.05f );
+
+                theRenderer.color = new Color( 1, 1, 1, 1 );
+
+                yield return new WaitForSeconds( 0.05f );
+
+                damageTimeCount--;
+            }
+            if( damageTimeCount <= 0 ) {
+                IsInvincible = false;
+            }
+		}
+    }
+
+    public override void Death( ) {
+        base.Death( );
+        m_Rb.simulated = false;
+        m_Anim.SetTrigger( "Dead" );
     }
 } 
